@@ -721,6 +721,7 @@ def main():
                             return # downloading일 경우 finished에서 다시 업데이트하지 않도록 return
 
                     progress_percent = int((downloaded_count / total_videos) * 100) if total_videos > 0 else 0
+                    progress_percent = min(progress_percent, 100)  # 100 넘으면 100으로 고정
                     progress_bar_section2.progress(progress_percent) # Streamlit 프로그레스 바 업데이트 (yt-dlp와 분리)
 
                 ydl_opts['progress_hooks'].append(progress_hook) # yt-dlp 프로그레스 훅 함수 등록 (주석 해제!!)
