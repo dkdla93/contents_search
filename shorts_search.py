@@ -329,7 +329,7 @@ def get_youtube_shorts(api_key_manager, search_query=None, tag_query=None,
 # 4) Streamlit App
 ###############################################################################
 def main():
-    st.title("YouTube Shorts & Video Downloader App")
+    st.title("유튜브 쇼츠 추천 및 다운로드 서비스")
 
     # **[수정] 세션 상태 명시적 초기화 (main 함수 시작 시점)**
     if 'recommended_keywords_df' not in st.session_state:
@@ -338,11 +338,18 @@ def main():
     #######################################
     # 0) 추천 키워드 찾기 섹션
     #######################################
-    st.subheader("0) 추천 키워드 찾기(10개)")
-
+    st.subheader("1. 추천 키워드 검색(10개)")
+    st.markdown("""
+    **사용방법**  
+    1. **추천받고 싶은 키워드**를 입력하세요 (예: `animal`).  
+    2. **검색 국가**를 선택할 수 있습니다. "None"은 전 세계를 의미합니다.  
+    3. **"추천 키워드 찾기"** 버튼을 누르면, 10개의 관련 키워드가 추천됩니다.  
+    4. 결과는 **엑셀**로 **다운로드**할 수 있습니다.
+    """)
+    
     # **[추가] 국가 선택 selectbox**
     region_code_0 = st.selectbox(
-        "Region Code (추천 키워드용)",
+        "국가 선택 (추천 키워드용)",
         ["US", "KR", "JP", "None"], # 국가 목록 (필요에 따라 추가)
         index=0,
         key="region_for_trend"
@@ -404,8 +411,18 @@ def main():
     ############################################################################
     # 섹션 A) 키워드 엑셀 업로드 → Shorts 데이터 수집 → 엑셀 다운로드
     ############################################################################
-    st.subheader("1) 키워드 기반 YouTube Shorts 데이터 수집")
-
+    st.subheader("2. 키워드 기반 YouTube Shorts 콘텐츠 수집")
+    st.markdown("""
+    **사용방법**  
+    1. **키워드 목록이 담긴 엑셀 파일**을 업로드합니다.  
+        - 해당 엑셀 내 `keyword` 칼럼의 값을 사용합니다.
+    2. **국가선택**(Shorts 수집용), **검색기간**, **키워드별 최대 수집 개수**를 설정합니다.  
+    3. **"Shorts 데이터 수집 시작"** 버튼을 누르면,  
+       - 해당 키워드로 YouTube Shorts를 검색하여  
+       - (최대 설정 개수만큼) **조회수가 높고 좋아요가 1개 이상**인 영상들을 수집합니다.  
+    4. 수집 완료 후, **결과 엑셀**(썸네일이 포함된)이 **다운로드** 가능합니다.
+    """)
+    
     # 세션 스테이트에 결과 저장 여부 확인
     if "shorts_data_df" not in st.session_state:
         st.session_state["shorts_data_df"] = None
@@ -419,7 +436,7 @@ def main():
             st.error("엑셀 파일에 'keyword' 칼럼이 필요합니다.")
         else:
             region_code_1 = st.selectbox(
-                "Region Code (Shorts 수집용)",
+                "국가 선택 (Shorts 수집용)",
                 ["US", "JP", "KR", "None"],
                 index=0,
                 key="region_for_shorts"  # key를 다르게
@@ -429,7 +446,7 @@ def main():
 
             period_options = ["None", "hour", "today", "week", "month", "3month", "6month", "2year", "3year"]
             period_choice_1 = st.selectbox(
-                "Period 선택", 
+                "검색기간 선택", 
                 period_options, 
                 index=0,
                 key="period_for_shorts"
@@ -438,7 +455,7 @@ def main():
                 period_choice_1 = None
 
 
-            max_results = st.number_input("수집할 키워드당 최대 Shorts 수", min_value=1, max_value=500, value=50)
+            max_results = st.number_input("키워드당 최대 수집 Shorts 수", min_value=1, max_value=500, value=50)
 
             if st.button("Shorts 데이터 수집 시작"):
                 st.info("데이터 수집을 시작합니다. 잠시만 기다려주세요...")
@@ -656,8 +673,17 @@ def main():
     # 섹션 B) 유튜브 링크 엑셀 업로드 → mp4 다운로드 → ZIP 파일로 제공
     # (항상 표시되도록, 섹션 A와 독립)
     ############################################################################
-    st.subheader("2) YouTube 영상 다운로드 (mp4)")
-
+    st.subheader("3. YouTube 영상 다운로드 (mp4)")
+    st.markdown("""
+    **사용방법**  
+    1. **유튜브 링크(영상 URL)**가 담긴 엑셀 파일을 업로드합니다.  
+       - 해당 엑셀 내 `url` 칼럼의 값을 사용합니다.
+    2. **"영상 다운로드 및 ZIP 만들기"** 버튼을 누르면,  
+       - 각 URL에 해당하는 영상을 mp4로 다운받고,  
+       - 파일들을 하나의 **ZIP**으로 묶어 줍니다.  
+    3. 다운로드가 완료되면, **ZIP 파일**을 바로 **다운로드**할 수 있습니다.
+    """)
+    
     uploaded_links_file = st.file_uploader("유튜브 링크가 담긴 엑셀 파일을 업로드하세요", type=["xlsx"], key="video_links")
     if uploaded_links_file is not None:
         df_links = pd.read_excel(uploaded_links_file)
@@ -729,7 +755,7 @@ def main():
                 try:
                     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                         ydl.download(video_links)
-                    st.success("모든 동영상 다운로드가 완료되었습니다.")
+                    st.success("모든 동영상 다운로드가 완료되었습니다. 곧 다운로드 버튼이 등장합니다.")
                 except Exception as e:
                     st.error(f"동영상 다운로드 중 오류가 발생했습니다: {e}")
                     return
