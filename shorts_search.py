@@ -329,7 +329,7 @@ def get_youtube_shorts(api_key_manager, search_query=None, tag_query=None,
 # 4) Streamlit App
 ###############################################################################
 def main():
-    st.title("유튜브 쇼츠 추천 및 다운로드 서비스")
+    st.title("유튜브 쇼츠 수집 및 다운로드 서비스")
 
     # **[수정] 세션 상태 명시적 초기화 (main 함수 시작 시점)**
     if 'recommended_keywords_df' not in st.session_state:
@@ -343,8 +343,8 @@ def main():
     with st.expander("사용자 가이드"):
         st.info(
             """
-            1) **추천받고 싶은 키워드**를 입력하세요 (예: `animal`).  
-            2) **검색 국가**를 선택할 수 있습니다. "None"은 전 세계를 의미합니다.  
+            1) **추천받고 싶은 키워드**를 입력하세요 (예: **`animal`**).  
+            2) **검색 국가**를 선택할 수 있습니다. **"None"**은 전 세계를 의미합니다.  
             3) **"추천 키워드 찾기"** 버튼을 누르면, 10개의 관련 키워드가 추천됩니다.  
             4) 결과는 **엑셀**로 **다운로드**할 수 있습니다.
             """
