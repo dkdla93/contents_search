@@ -16,10 +16,16 @@ from io import BytesIO
 from openpyxl.styles import Alignment, Font, PatternFill, Border, Side
 
 
+# NLTK 데이터 다운로드 (punkt, stopwords) - 필요한 데이터 추가 가능
+try:
+    nltk.data.find('tokenizers/punkt')
+except LookupError:
+    nltk.download('punkt')
 
-# nltk 다운로드 (처음 실행 시에만 필요할 수 있음)
-nltk.download('punkt')
-nltk.download('stopwords')
+try:
+    nltk.data.find('corpora/stopwords')
+except LookupError:
+    nltk.download('stopwords')
 
 ###############################################################################
 # 1) APIKeyManager 클래스
