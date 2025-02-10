@@ -726,8 +726,8 @@ def main():
             
                 # (2) yt-dlp 옵션
                 ydl_opts = {
-                    # (1) vcodec^=avc를 없애고, 좀 더 범용적으로
-                    'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]',
+                    'format': 'bv*[vcodec^=avc1]+ba[ext=m4a]/b[vcodec^=avc1]',
+                    'extractor-args': 'youtube:formats=skip_pot',
                     'outtmpl': os.path.join(download_dir, '%(title)s.%(ext)s'),
                     'merge_output_format': 'mp4',
                     'http_headers': {
