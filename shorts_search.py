@@ -727,9 +727,9 @@ def main():
                 # (2) yt-dlp 옵션
                 ydl_opts = {
                     'verbose': True,
-                    'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]',
+                    'format': '(bv*[ext=mp4]+ba[ext=m4a]/best[ext=mp4])[protocol!=m3u8]',
                     'outtmpl': os.path.join(download_dir, '%(id)s.%(ext)s'),
-                    'extractor-args': 'youtube:formats=missing_pot',
+                    'extractor-args': 'youtube:formats=skip_pot',
                     'restrictfilenames': True,
                     'force_ip_v4': True,
                     'merge_output_format': 'mp4',
