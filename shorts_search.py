@@ -726,7 +726,8 @@ def main():
             
                 # (2) yt-dlp 옵션
                 ydl_opts = {
-                    'format': 'bestvideo[ext=mp4][vcodec^=avc]+bestaudio[ext=m4a]/best[ext=mp4]',
+                    # (1) vcodec^=avc를 없애고, 좀 더 범용적으로
+                    'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]',
                     'outtmpl': os.path.join(download_dir, '%(title)s.%(ext)s'),
                     'merge_output_format': 'mp4',
                     'http_headers': {
@@ -735,11 +736,14 @@ def main():
                                        'Chrome/112.0.0.0 Safari/537.36'
                     },
                     'force-ipv4': True,
-                    'postprocessors': [{
-                         'key': 'FFmpegVideoConvertor',
-                         'preferedformat': 'mp4'
-                    }],
-                }
+                    'postprocessors': [
+                        {
+                            'key': 'FFmpegVideoConvertor',
+                            'preferedformat': 'mp4'
+                        }
+                    ],
+                    'cookiefile': 'cookies.txt'
+                }                
                 
                 # (3) 개별 링크 다운로드
                 failed_list = []
