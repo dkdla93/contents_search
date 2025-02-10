@@ -729,9 +729,18 @@ def main():
                     'format': 'bestvideo[ext=mp4][vcodec^=avc]+bestaudio[ext=m4a]/best[ext=mp4]',
                     'outtmpl': os.path.join(download_dir, '%(title)s.%(ext)s'),
                     'merge_output_format': 'mp4',
-                    'postprocessors': [{'key': 'FFmpegVideoConvertor','preferedformat': 'mp4'}],
+                    'http_headers': {
+                         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
+                                       'AppleWebKit/537.36 (KHTML, like Gecko) '
+                                       'Chrome/112.0.0.0 Safari/537.36'
+                    },
+                    'force-ipv4': True,
+                    'postprocessors': [{
+                         'key': 'FFmpegVideoConvertor',
+                         'preferedformat': 'mp4'
+                    }],
                 }
-            
+                
                 # (3) 개별 링크 다운로드
                 failed_list = []
                 downloaded_count = 0
