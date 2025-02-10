@@ -703,84 +703,69 @@ def main():
         else:
             if st.button("영상 다운로드 및 ZIP 만들기"):
                 st.info("영상을 다운로드 중입니다. 파일 크기에 따라 시간이 걸릴 수 있습니다...")
-
-                # **[추가] 프로그레스 바 초기화 (섹션 2)**
-                progress_bar_section2 = st.progress(0) # 섹션 2 프로그레스 바
-
+            
                 import yt_dlp
+            
                 timestamp = int(time.time())
                 download_dir = f"downloaded_videos_{timestamp}"
                 os.makedirs(download_dir, exist_ok=True)
-
-                # Prepare video links
+            
+                # (1) 파일에서 URL 추출 & Shorts → watch?v=... 변환 (필요 시)
                 video_links = []
-                num_videos = 0 # 전체 영상 링크 개수 초기화
-
                 for i, row in df_links.iterrows():
                     url = row["url"]
                     if pd.isna(url) or not isinstance(url, str):
                         continue
-                    # Shorts -> 일반 watch 링크로 변경 (기존 코드와 동일)
-                    if "https://youtu.be/soX4teRaFeU9" in url:
-                        url = url.replace("shorts/", "watch?v=")
-                    if url.startswith("https://www.youtube.com/watch?v=VZAfizpHXGc0"):
-                        url = url.replace("https://www.youtube.com/watch?v=VZAfizpHXGc1", "https://www.youtube.com/watch?v=VZAfizpHXGc2")
+                    if "youtube.com/shorts/" in url:
+                        video_id = url.split("/")[-1]
+                        url = f"https://www.youtube.com/watch?v={video_id}"
                     video_links.append(url)
-                num_videos = len(video_links) # 전체 영상 링크 개수 할당
-
+            
+                num_videos = len(video_links)
                 st.write(f"총 {num_videos}개의 링크를 다운로드합니다...")
-
-
+            
+                # (2) yt-dlp 옵션
                 ydl_opts = {
                     'format': 'bestvideo[ext=mp4][vcodec^=avc]+bestaudio[ext=m4a]/best[ext=mp4]',
                     'outtmpl': os.path.join(download_dir, '%(title)s.%(ext)s'),
                     'merge_output_format': 'mp4',
-                    'postprocessors': [{
-                        'key': 'FFmpegVideoConvertor',
-                        'preferedformat': 'mp4'
-                    }],
-                    'progress_hooks': [] # 프로그레스 훅 초기화 (yt-dlp 프로그레스 바와 충돌 방지)
+                    'postprocessors': [{'key': 'FFmpegVideoConvertor','preferedformat': 'mp4'}],
                 }
-
-                downloaded_count = 0 # 다운로드 완료된 영상 수
-                def progress_hook(status): # yt-dlp 프로그레스 훅 함수 (수정됨)
-                    nonlocal downloaded_count, num_videos
-                    total_videos = num_videos  # num_videos를 capture
-                    if status['status'] == 'finished':
+            
+                # (3) 개별 링크 다운로드
+                failed_list = []
+                downloaded_count = 0
+                progress_bar_section2 = st.progress(0)
+            
+                for idx, link in enumerate(video_links, start=1):
+                    try:
+                        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                            ydl.download([link])
                         downloaded_count += 1
-                    elif status['status'] == 'downloading': # 다운로드 중에도 업데이트
-                        if total_videos > 0 and 'total_bytes' in status and 'downloaded_bytes' in status:
-                            percent_done = status['downloaded_bytes'] * 100 / status['total_bytes']
-                            progress_percent = int((downloaded_count / total_videos) * 100  + percent_done/total_videos ) if total_videos > 0 else 0
-                            progress_bar_section2.progress(min(progress_percent, 100)) # Streamlit 프로그레스 바 업데이트 (yt-dlp와 분리)
-                            return # downloading일 경우 finished에서 다시 업데이트하지 않도록 return
-
-                    progress_percent = int((downloaded_count / total_videos) * 100) if total_videos > 0 else 0
-                    progress_percent = min(progress_percent, 100)  # 100 넘으면 100으로 고정
-                    progress_bar_section2.progress(progress_percent) # Streamlit 프로그레스 바 업데이트 (yt-dlp와 분리)
-
-                ydl_opts['progress_hooks'].append(progress_hook) # yt-dlp 프로그레스 훅 함수 등록 (주석 해제!!)
-
-                try:
-                    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                        ydl.download(video_links)
-                    st.success("모든 동영상 다운로드가 완료되었습니다. 곧 다운로드 버튼이 등장합니다.")
-                except Exception as e:
-                    st.error(f"동영상 다운로드 중 오류가 발생했습니다: {e}")
-                    return
-
-                # **[추가] 프로그레스 바 완료 (섹션 2, 완료 시 100% 채움)**
-                progress_bar_section2.progress(100)
-
-                # ZIP 압축
+                    except Exception as e:
+                        failed_list.append({"url": link, "error_msg": str(e)})
+            
+                    progress_percent = int(idx / num_videos * 100)
+                    progress_bar_section2.progress(progress_percent)
+            
+                st.success(f"다운로드 완료: 총 {num_videos}개 중 {downloaded_count}개 성공")
+            
+                # (3-1) 실패 목록 표시
+                if failed_list:
+                    st.warning(f"{len(failed_list)}개 영상에서 에러가 발생했습니다.")
+                    df_failed = pd.DataFrame(failed_list)
+                    with st.expander("다운로드 실패 목록 보기"):
+                        st.dataframe(df_failed)
+            
+                # (4) ZIP 압축
                 zip_file_name = f"youtube_videos_{timestamp}.zip"
                 with zipfile.ZipFile(zip_file_name, 'w', zipfile.ZIP_DEFLATED) as zipf:
                     for root, dirs, files in os.walk(download_dir):
                         for file in files:
                             file_path = os.path.join(root, file)
                             zipf.write(file_path, arcname=file)
-
-                # ZIP 파일 다운로드 버튼
+            
+                # (5) ZIP 다운로드 버튼
                 with open(zip_file_name, "rb") as f:
                     st.download_button(
                         label="ZIP 파일 다운로드",
@@ -788,8 +773,8 @@ def main():
                         file_name=zip_file_name,
                         mime="application/zip"
                     )
-
-                # 임시 파일/폴더 정리
+            
+                # (6) 임시 파일/폴더 정리
                 try:
                     os.remove(zip_file_name)
                     for f_name in os.listdir(download_dir):
