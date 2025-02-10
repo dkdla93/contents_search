@@ -7,4 +7,4 @@ pytube
 openpyxl
 google-generativeai
 google-api-python-client
-yt-dlp
+yt-dlp[curl-cffi]>=2025.1.26
