@@ -749,7 +749,7 @@ def main():
                                       'Chrome/112.0.0.0 Safari/537.36'
                     }
                     # 'cookiefile': 'cookies.txt',  # 필요한 경우 쿠키파일 지정
-                    # 'skip_unavailable_fragments': True,  # 조각 누락 시 건너뛰고 계속
+                    'skip_unavailable_fragments': True,  # 조각 누락 시 건너뛰고 계속
                     # ...
                 }
 
