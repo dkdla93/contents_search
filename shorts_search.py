@@ -726,28 +726,22 @@ def main():
             
                 # (2) yt-dlp 옵션
                 ydl_opts = {
-                    'verbose': True,
-                    'format': '(bv*[ext=mp4]+ba[ext=m4a]/best[ext=mp4])[protocol!=m3u8]',
-                    'outtmpl': os.path.join(download_dir, '%(id)s.%(ext)s'),
-                    'extractor-args': 'youtube:formats=skip_pot',
-                    'restrictfilenames': True,
-                    'force_ip_v4': True,
+                    'format': 'bestvideo[ext=mp4][vcodec^=avc]+bestaudio[ext=m4a]/best[ext=mp4]',
+                    'outtmpl': os.path.join(download_dir, '%(title)s.%(ext)s'),
                     'merge_output_format': 'mp4',
-                    'postprocessors': [
-                        {
-                            'key': 'FFmpegVideoConvertor',
-                            'preferedformat': 'mp4'
-                        }
-                    ],
-                    'hls_prefer_ffmpeg': True,
-                    'external_downloader': 'ffmpeg',
                     'http_headers': {
-                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
-                                      'AppleWebKit/537.36 (KHTML, like Gecko) '
-                                      'Chrome/112.0.0.0 Safari/537.36'
+                         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
+                                       'AppleWebKit/537.36 (KHTML, like Gecko) '
+                                       'Chrome/112.0.0.0 Safari/537.36'
                     },
-                    'skip_unavailable_fragments': True
+                    'force-ipv4': True,
+                    'postprocessors': [{
+                         'key': 'FFmpegVideoConvertor',
+                         'preferedformat': 'mp4'
+                    }],
                 }
+
+                
                 
                 # (3) 개별 링크 다운로드
                 failed_list = []
