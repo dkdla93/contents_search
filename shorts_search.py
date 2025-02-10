@@ -716,9 +716,9 @@ def main():
                     url = row["url"]
                     if pd.isna(url) or not isinstance(url, str):
                         continue
-                    if "youtube.com/shorts/" in url:
-                        video_id = url.split("/")[-1]
-                        url = f"https://www.youtube.com/watch?v={video_id}"
+                    # if "youtube.com/shorts/" in url:
+                    #    video_id = url.split("/")[-1]
+                    #    url = f"https://www.youtube.com/watch?v={video_id}"
                     video_links.append(url)
             
                 num_videos = len(video_links)
