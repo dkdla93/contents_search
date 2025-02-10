@@ -742,7 +742,8 @@ def main():
                             'preferedformat': 'mp4'
                         }
                     ],
-                    'cookiefile': 'cookies.txt'
+                    'hls_prefer_ffmpeg': True,        # HLS 다운로드 시, FFmpeg 사용
+                    'external_downloader': 'ffmpeg'  # 외부 다운로더로 ffmpeg 지정
                 }                
                 
                 # (3) 개별 링크 다운로드
