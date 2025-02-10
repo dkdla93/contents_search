@@ -726,25 +726,34 @@ def main():
             
                 # (2) yt-dlp 옵션
                 ydl_opts = {
-                    'format': 'bv*[vcodec^=avc1]+ba[ext=m4a]/b[vcodec^=avc1]',
-                    'extractor-args': 'youtube:formats=skip_pot',
+                    # (1) 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]' → 터미널에서 쓰던 방식
+                    # 'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]',
+                
+                    # 또는 H.264 선호 + VP9 fallback까지 고려하려면:
+                    'format': 'bv*[vcodec^=avc1]+ba[ext=m4a]/b[vcodec^=avc1]/bv*+ba/best',
+                
+                    # 이하 동일
                     'outtmpl': os.path.join(download_dir, '%(title)s.%(ext)s'),
                     'merge_output_format': 'mp4',
-                    'http_headers': {
-                         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
-                                       'AppleWebKit/537.36 (KHTML, like Gecko) '
-                                       'Chrome/112.0.0.0 Safari/537.36'
-                    },
-                    'force-ipv4': True,
                     'postprocessors': [
                         {
                             'key': 'FFmpegVideoConvertor',
                             'preferedformat': 'mp4'
                         }
                     ],
-                    'hls_prefer_ffmpeg': True,        # HLS 다운로드 시, FFmpeg 사용
-                    'external_downloader': 'ffmpeg'  # 외부 다운로더로 ffmpeg 지정
-                }                
+                    'hls_prefer_ffmpeg': True,
+                    'external_downloader': 'ffmpeg',
+                    'http_headers': {
+                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
+                                      'AppleWebKit/537.36 (KHTML, like Gecko) '
+                                      'Chrome/112.0.0.0 Safari/537.36'
+                    }
+                    # 'cookiefile': 'cookies.txt',  # 필요한 경우 쿠키파일 지정
+                    # 'skip_unavailable_fragments': True,  # 조각 누락 시 건너뛰고 계속
+                    # ...
+                }
+
+                
                 
                 # (3) 개별 링크 다운로드
                 failed_list = []
