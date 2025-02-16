@@ -497,7 +497,7 @@ def main():
                     time.sleep(1)
 
                     # **[추가] 프로그레스 바 업데이트 (섹션 1)**
-                    progress_percent = int(((idx + 1) / num_keywords) * 100) # 진행률 계산
+                    progress_percent = int(((idx + 1) / num_keywords) * 100)
                     progress_bar_section1.progress(progress_percent) # 프로그레스 바 업데이트
 
 
@@ -667,12 +667,11 @@ def main():
                     )
                     cell.alignment = new_alignment
 
-            writer.save()
-        excel_buffer.seek(0)  # 버퍼 포인터를 시작점으로 되돌림
-
         # 현재 시간을 파일명에 추가
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
         file_name = f"shorts_result_{timestamp}.xlsx"
+
+        excel_buffer.seek(0)  # 버퍼 포인터를 시작점으로 되돌림
 
         st.download_button(
             label="결과 엑셀 다운로드",
